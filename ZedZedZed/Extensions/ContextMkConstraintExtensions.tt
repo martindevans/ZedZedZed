@@ -1,0 +1,108 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+
+<#
+	var types = new List<KeyValuePair<string, string>>() {
+		new KeyValuePair<string, string>("Inty", "long"),
+		new KeyValuePair<string, string>("Booly", "bool")
+	};
+
+	void Permutations<TE>(TE[] perm, int pos, IReadOnlyList<TE> elements, ICollection<TE[]> results) {
+		if (pos == perm.Length) {
+			results.Add(perm.ToArray());
+		} else {
+			for (int i = 0 ; i < elements.Count; i++) {
+				perm[pos] = elements[i];
+				Permutations(perm, pos + 1, elements, results);
+			}
+		}
+	}
+
+	string FormatSignature(KeyValuePair<string, string>[] ts)
+    {
+        var inputs = string.Join(",", ts.Select((a, i) => string.Format("[NotNull] {0} p{1}", a.Key, i)));
+        var exprs = string.Join(",", ts.Select(a => a.Value));
+
+        return $"[NotNull] public static BoolExpr MkConstraint([NotNull] this Context ctx, {inputs}, [NotNull] Expression<Func<{exprs}, bool>> expression) {{";
+    }
+
+	string FormatChecks(IReadOnlyList<KeyValuePair<string, string>> ts)
+    {
+        /*
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+            if (a == null) throw new ArgumentNullException(nameof(a));
+            if (b == null) throw new ArgumentNullException(nameof(b));
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+        */
+
+        var paramChecks = string.Join(" ", ts.Select((a, i) => string.Format("if (p{0} == null) throw new ArgumentNullException(nameof(p{0}));", i)));
+
+        return $"if (ctx == null) throw new ArgumentNullException(nameof(ctx));{paramChecks}" + "if (expression == null) throw new ArgumentNullException(nameof(expression));";
+    }
+
+	string FormatBody(IReadOnlyList<KeyValuePair<string, string>> ts)
+    {
+        /*
+            return MkExpressionConstraint.CreateBoolExpression(ctx, MkExpressionConstraint.ExtractParameters(ctx, expression.Parameters, a, b, c), expression.Body);
+        */
+
+        var ps = string.Join(",", ts.Select((a, i) => $"p{i}"));
+
+        return $"return MkExpressionConstraint.CreateBoolExpression(ctx, MkExpressionConstraint.ExtractParameters(ctx, expression.Parameters, {ps}), expression.Body);";
+    }
+
+	/*
+[NotNull]
+public static BoolExpr MkConstraint(
+    [NotNull] this Context ctx,
+    [NotNull] Inty a, [NotNull] Inty b, [NotNull] Inty c,
+    [NotNull] Expression<Func<long, long, long, bool>> expression
+)
+{
+    if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+    if (a == null) throw new ArgumentNullException(nameof(a));
+    if (b == null) throw new ArgumentNullException(nameof(b));
+    if (expression == null) throw new ArgumentNullException(nameof(expression));
+
+    return MkExpressionConstraint.CreateBoolExpression(ctx, MkExpressionConstraint.ExtractParameters(ctx, expression.Parameters, a, b, c), expression.Body);
+}
+*/
+
+#>
+using System;
+using System.Linq.Expressions;
+using JetBrains.Annotations;
+using Microsoft.Z3;
+using ZedZedZed.Containers;
+
+namespace ZedZedZed.Extensions {
+	public static class MkConstraintExtensions {
+<#
+
+	var MaxParameters = 4;
+	for	(var l = 1; l <= MaxParameters; l++) {
+		
+		var re = new List<KeyValuePair<string, string>[]>();
+		Permutations(new KeyValuePair<string, string>[l], 0, types, re);
+
+		foreach (var item in re) {
+			var sig = FormatSignature(item);
+			var chx = FormatChecks(item);
+			var bdy = FormatBody(item);
+
+			#>
+				<#= sig #>
+				<#= chx #>
+				<#= bdy #>
+			}
+			<#
+		}
+	}
+#>
+
+	}	//class
+}	//namespace

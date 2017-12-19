@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Z3;
 using ZedZedZed.Extensions;
 
@@ -9,7 +8,7 @@ namespace ZedZedZed.Test
     public class BoolExpressionContextExtensionsTests
     {
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsParameter()
+        public void MkConstraint_EqualsParameter()
         {
             using (var ctx = new Context())
             {
@@ -21,267 +20,126 @@ namespace ZedZedZed.Test
                 Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
                 var result = (BoolExpr)s.Model.Eval(a);
-                Assert.AreEqual(true, result.BoolValue);
+                Assert.IsTrue(result.IsTrue);
             }
         }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsConstant()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_EqualsConstant()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, x => x == -3));
+                s.Assert(ctx.MkConstraint(a, x => x == false));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.AreEqual(-3, result.Int);
-        //    }
-        //}
+                var result = (BoolExpr)s.Model.Eval(a);
+                Assert.IsFalse(result.IsTrue);
+            }
+        }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsAddition()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var b = ctx.MkConstInt("B");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_Not()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, b, (x, y) => x + y == 3));
+                s.Assert(ctx.MkConstraint(a, x => !x));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var ar = ((IntNum)s.Model.Eval(a)).Int;
-        //        var br = ((IntNum)s.Model.Eval(b)).Int;
+                var ar = s.Model.Eval(a).IsTrue;
 
-        //        Assert.AreEqual(3, ar + br);
-        //    }
-        //}
+                Assert.IsFalse(ar);
+            }
+        }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsSubtraction()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var b = ctx.MkConstInt("B");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_And()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var b = ctx.MkConstBool("B");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, b, (x, y) => x - y == 3));
+                s.Assert(ctx.MkConstraint(a, b, (x, y) => x && !y));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var ar = ((IntNum)s.Model.Eval(a)).Int;
-        //        var br = ((IntNum)s.Model.Eval(b)).Int;
+                var ar = s.Model.Eval(a).IsTrue;
+                var br = s.Model.Eval(b).IsTrue;
 
-        //        Assert.AreEqual(3, ar - br);
-        //    }
-        //}
+                Assert.IsTrue(ar && !br);
+            }
+        }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsMultiplication()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var b = ctx.MkConstInt("B");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_Xor()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var b = ctx.MkConstBool("B");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, b, (x, y) => x * y == 3));
+                // Set up:
+                //    UNSATISFIABLE XOR SOMETHING
+                // Then Verify that `SOMETHING` holds
+                s.Assert(ctx.MkConstraint(a, b, (x, y) => (x && !x && !y) ^ (x && y)));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var ar = ((IntNum)s.Model.Eval(a)).Int;
-        //        var br = ((IntNum)s.Model.Eval(b)).Int;
+                var ar = s.Model.Eval(a).IsTrue;
+                var br = s.Model.Eval(b).IsTrue;
 
-        //        Assert.AreEqual(3, ar * br);
-        //    }
-        //}
+                Assert.IsTrue(ar && br);
+            }
+        }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsDivision()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var b = ctx.MkConstInt("B");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_Or()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var b = ctx.MkConstBool("B");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, b, (x, y) => x / y == 3));
+                s.Assert(ctx.MkConstraint(a, b, (x, y) => (x && y) || (!x && !y)));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var ar = ((IntNum)s.Model.Eval(a)).Int;
-        //        var br = ((IntNum)s.Model.Eval(b)).Int;
+                var ar = s.Model.Eval(a).IsTrue;
+                var br = s.Model.Eval(b).IsTrue;
 
-        //        Assert.AreEqual(3, ar / br);
-        //    }
-        //}
+                Assert.IsTrue(ar && br || !ar && !br);
+            }
+        }
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsConstant_WithCastToInt32()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
+        [TestMethod]
+        public void MkConstraint_Conditional()
+        {
+            using (var ctx = new Context())
+            {
+                var a = ctx.MkConstBool("A");
+                var b = ctx.MkConstBool("B");
+                var s = ctx.MkSolver();
 
-        //        s.Assert(ctx.MkConstraint(a, 3, (x, y) => x == (int)y));
+                s.Assert(ctx.MkConstraint(a, b, (aa, bb) => aa ? bb : bb && aa));
 
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
+                Assert.AreEqual(Status.SATISFIABLE, s.Check());
 
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.AreEqual(3, result.Int);
-        //    }
-        //}
+                var ar = s.Model.Eval(a).IsTrue;
+                var br = s.Model.Eval(b).IsTrue;
 
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_EqualsConstant_WithCastToUInt16()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        s.Assert(ctx.MkConstraint(a, int.MaxValue, (x, y) => x == (ushort)y));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.AreEqual(int.MaxValue, result.Int);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_And()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        s.Assert(ctx.MkConstraint(a, x => x > 3 && x < 10));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.IsTrue(result.Int > 3);
-        //        Assert.IsTrue(result.Int < 10);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_Or()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        s.Assert(ctx.MkConstraint(a, x => x < 3 || x > 10));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.IsTrue(result.Int < 3 || result.Int > 10);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_Xor()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        s.Assert(ctx.MkConstraint(a, x => x < 3 ^ x < 10));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var result = (IntNum)s.Model.Eval(a);
-        //        Assert.IsTrue(result.Int < 3 ^ result.Int < 10);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_Mod()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        s.Assert(ctx.MkConstraint(a, x => x % 77 == 17 && x > 17));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var resulta = (IntNum)s.Model.Eval(a);
-
-        //        Assert.AreEqual(17, resulta.Int % 77);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_NestedIfThenElse()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var b = ctx.MkConstInt("B");
-        //        var s = ctx.MkSolver();
-
-        //        // ReSharper disable once SimplifyConditionalTernaryExpression
-        //        s.Assert(ctx.MkConstraint(a, b, (x, y) => y == ((x < 3 ? false : true) ? 2 : 4)));
-
-        //        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        //        var resulta = (IntNum)s.Model.Eval(a);
-        //        var resultb = (IntNum)s.Model.Eval(b);
-
-        //        if (resulta.Int < 3)
-        //            Assert.AreEqual(4, resultb.Int);
-        //        if (resulta.Int > 3)
-        //            Assert.AreEqual(2, resultb.Int);
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AssertThat_MkConstraint_ThrowsWithMultipleNameBindings()
-        //{
-        //    using (var ctx = new Context())
-        //    {
-        //        var a = ctx.MkConstInt("A");
-        //        var s = ctx.MkSolver();
-
-        //        Assert.ThrowsException<InvalidOperationException>(() => {
-        //            // ReSharper disable once AccessToDisposedClosure
-        //            s.Assert(ctx.MkConstraint(a, a, (x, y) => x != y));
-        //        });
-        //    }
-        //}
-
-        ////[TestMethod]
-        ////public void AssertThat_MkConstraint_Power()
-        ////{
-        ////    using (var ctx = new Context())
-        ////    {
-        ////        var a = ctx.MkConstInt("A");
-        ////        var s = ctx.MkSolver();
-
-        ////        //C# does now have an exponentiation operator, so how do we represent this in an expression?
-        ////        s.Assert(ctx.MkConstraint(a, x => x ^ 7 == 49));
-
-        ////        Assert.AreEqual(Status.SATISFIABLE, s.Check());
-
-        ////        var resulta = (IntNum)s.Model.Eval(a);
-
-        ////        Assert.AreEqual(7, resulta.Int);
-        ////    }
-        ////}
+                Assert.IsTrue(ar ? br : br && ar);
+            }
+        }
     }
 }

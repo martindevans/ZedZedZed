@@ -5,6 +5,7 @@ using Microsoft.Z3;
 namespace ZedZedZed.Containers
 {
     public class Inty
+        : IZ3Container
     {
         private readonly long _value;
         private readonly IntExpr _expr;
@@ -35,7 +36,7 @@ namespace ZedZedZed.Containers
         }
 
         [NotNull]
-        public IntExpr ToExpression(Context ctx)
+        public Expr ToExpr(Context ctx)
         {
             if (_expr != null)
                 return _expr;

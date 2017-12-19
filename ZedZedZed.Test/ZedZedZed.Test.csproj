@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="BoolExpressionContextExtensionsTests.cs" />
     <Compile Include="IntExpressionContextExtensionsTests.cs" />
+    <Compile Include="Playground.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -5,6 +5,7 @@ using Microsoft.Z3;
 namespace ZedZedZed.Containers
 {
     public class Booly
+        : IZ3Container
     {
         private readonly bool _value;
         private readonly BoolExpr _expr;
@@ -37,7 +38,7 @@ namespace ZedZedZed.Containers
         }
 
         [NotNull]
-        public BoolExpr ToExpression(Context ctx)
+        public Expr ToExpr(Context ctx)
         {
             if (_expr != null)
                 return _expr;

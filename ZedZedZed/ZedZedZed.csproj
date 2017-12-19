@@ -49,12 +49,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\Booly.cs" />
+    <Compile Include="Containers\IZ3Container.cs" />
     <Compile Include="Demo.cs" />
-    <Compile Include="Extensions\BoolExpressionContextExtensions.cs" />
     <Compile Include="Extensions\ContextExtensions.cs" />
+    <Compile Include="Extensions\ContextMkConstraintExtensions.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ContextMkConstraintExtensions.tt</DependentUpon>
+    </Compile>
     <Compile Include="Extensions\IntExpressionContextExtensions.cs" />
     <Compile Include="Containers\Inty.cs" />
     <Compile Include="Extensions\MkExpressionConstraint.cs" />
+    <Compile Include="Extensions\RatNumExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sudoku.cs" />
   </ItemGroup>
@@ -65,6 +71,15 @@
     <None Include="libz3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Extensions\ContextMkConstraintExtensions.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ContextMkConstraintExtensions.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
