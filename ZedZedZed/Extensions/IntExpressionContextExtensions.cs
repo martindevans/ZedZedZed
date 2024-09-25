@@ -1,46 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 using Microsoft.Z3;
 
 namespace ZedZedZed.Extensions
 {
     public static class IntExpressionContextExtensions
     {
-        [NotNull]
-        internal static BoolExpr CreateIntInequality([NotNull] Context ctx, [NotNull] IReadOnlyDictionary<string, Expr> values, [NotNull] BinaryExpression expression)
+        internal static BoolExpr CreateIntInequality(Context ctx, IReadOnlyDictionary<string, Expr> values, BinaryExpression expression)
         {
             var left = CreateIntExpression(ctx, values, expression.Left);
             var right = CreateIntExpression(ctx, values, expression.Right);
 
-            switch (expression.NodeType)
+            return expression.NodeType switch
             {
-                case ExpressionType.NotEqual:
-                    return ctx.MkNot(ctx.MkEq(left, right));
-
-                case ExpressionType.Equal:
-                    return ctx.MkEq(left, right);
-
-                case ExpressionType.GreaterThan:
-                    return ctx.MkGt(left, right);
-
-                case ExpressionType.GreaterThanOrEqual:
-                    return ctx.MkGe(left, right);
-
-                case ExpressionType.LessThan:
-                    return ctx.MkLt(left, right);
-
-                case ExpressionType.LessThanOrEqual:
-                    return ctx.MkLe(left, right);
-
-                default:
-                    throw new NotSupportedException($"Unsupported inequality operator \"{expression.NodeType}\"");
-            }
+                ExpressionType.NotEqual => ctx.MkNot(ctx.MkEq(left, right)),
+                ExpressionType.Equal => ctx.MkEq(left, right),
+                ExpressionType.GreaterThan => ctx.MkGt(left, right),
+                ExpressionType.GreaterThanOrEqual => ctx.MkGe(left, right),
+                ExpressionType.LessThan => ctx.MkLt(left, right),
+                ExpressionType.LessThanOrEqual => ctx.MkLe(left, right),
+                _ => throw new NotSupportedException($"Unsupported inequality operator \"{expression.NodeType}\"")
+            };
         }
 
-        [NotNull]
-        private static IntExpr CreateIntExpression(Context ctx, [NotNull] IReadOnlyDictionary<string, Expr> variables, [NotNull] Expression expression)
+        private static IntExpr CreateIntExpression(Context ctx, IReadOnlyDictionary<string, Expr> variables, Expression expression)
         {
             switch (expression.NodeType)
             {

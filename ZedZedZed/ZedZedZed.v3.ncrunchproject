@@ -1,8 +1,0 @@
-﻿<ProjectConfiguration>
-  <Settings>
-    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
-    <RunPostBuildEvents>True</RunPostBuildEvents>
-    <RunPreBuildEvents>True</RunPreBuildEvents>
-    <UseCPUArchitecture>x64</UseCPUArchitecture>
-  </Settings>
-</ProjectConfiguration>

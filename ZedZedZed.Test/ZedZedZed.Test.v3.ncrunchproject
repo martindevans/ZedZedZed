@@ -1,8 +1,0 @@
-﻿<ProjectConfiguration>
-  <Settings>
-    <AdditionalFilesToIncludeForProject />
-    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
-    <RunPostBuildEvents>False</RunPostBuildEvents>
-    <UseCPUArchitecture>x64</UseCPUArchitecture>
-  </Settings>
-</ProjectConfiguration>

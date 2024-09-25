@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Z3;
+﻿using Microsoft.Z3;
 using ZedZedZed.Extensions;
 
 namespace ZedZedZed.Test
@@ -8,16 +6,8 @@ namespace ZedZedZed.Test
     [TestClass]
     public class IntExpressionContextExtensionsTests
     {
-        //[TestMethod]
-        //public void Playground()
-        //{
-        //    using (var ctx = new Context(new Dictionary<string, string> { { "model", "true" } }))
-        //    using (var sudoku = new Sudoku(ctx))
-        //        sudoku.ExpressionRun();
-        //}
-
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsParameter()
+        public void MkConstraint_EqualsParameter()
         {
             using (var ctx = new Context())
             {
@@ -34,7 +24,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsConstant()
+        public void MkConstraint_EqualsConstant()
         {
             using (var ctx = new Context())
             {
@@ -51,7 +41,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsAddition()
+        public void MkConstraint_EqualsAddition()
         {
             using (var ctx = new Context())
             {
@@ -71,7 +61,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsSubtraction()
+        public void MkConstraint_EqualsSubtraction()
         {
             using (var ctx = new Context())
             {
@@ -91,7 +81,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsMultiplication()
+        public void MkConstraint_EqualsMultiplication()
         {
             using (var ctx = new Context())
             {
@@ -111,7 +101,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsDivision()
+        public void MkConstraint_EqualsDivision()
         {
             using (var ctx = new Context())
             {
@@ -126,12 +116,14 @@ namespace ZedZedZed.Test
                 var ar = ((IntNum)s.Model.Eval(a)).Int;
                 var br = ((IntNum)s.Model.Eval(b)).Int;
 
-                Assert.AreEqual(3, ar / br);
+                var (q, r) = Math.DivRem(ar, br);
+
+                Assert.AreEqual(3, q + Math.Abs(r));
             }
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsConstant_WithCastToInt32()
+        public void MkConstraint_EqualsConstant_WithCastToInt32()
         {
             using (var ctx = new Context())
             {
@@ -148,7 +140,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_EqualsConstant_WithCastToUInt16()
+        public void MkConstraint_EqualsConstant_WithCastToUInt16()
         {
             using (var ctx = new Context())
             {
@@ -165,7 +157,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_And()
+        public void MkConstraint_And()
         {
             using (var ctx = new Context())
             {
@@ -183,7 +175,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_Or()
+        public void MkConstraint_Or()
         {
             using (var ctx = new Context())
             {
@@ -200,7 +192,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_Xor()
+        public void MkConstraint_Xor()
         {
             using (var ctx = new Context())
             {
@@ -217,7 +209,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_Mod()
+        public void MkConstraint_Mod()
         {
             using (var ctx = new Context())
             {
@@ -235,7 +227,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_NestedIfThenElse()
+        public void MkConstraint_NestedIfThenElse()
         {
             using (var ctx = new Context())
             {
@@ -259,7 +251,7 @@ namespace ZedZedZed.Test
         }
 
         [TestMethod]
-        public void AssertThat_MkConstraint_ThrowsWithMultipleNameBindings()
+        public void MkConstraint_ThrowsWithMultipleNameBindings()
         {
             using (var ctx = new Context())
             {
@@ -274,7 +266,7 @@ namespace ZedZedZed.Test
         }
 
         //[TestMethod]
-        //public void AssertThat_MkConstraint_Power()
+        //public void MkConstraint_Power()
         //{
         //    using (var ctx = new Context())
         //    {

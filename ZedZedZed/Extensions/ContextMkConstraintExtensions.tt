@@ -24,24 +24,10 @@
 
 	string FormatSignature(KeyValuePair<string, string>[] ts)
     {
-        var inputs = string.Join(",", ts.Select((a, i) => string.Format("[NotNull] {0} p{1}", a.Key, i)));
+        var inputs = string.Join(",", ts.Select((a, i) => string.Format("{0} p{1}", a.Key, i)));
         var exprs = string.Join(",", ts.Select(a => a.Value));
 
-        return $"[NotNull] public static BoolExpr MkConstraint([NotNull] this Context ctx, {inputs}, [NotNull] Expression<Func<{exprs}, bool>> expression) {{";
-    }
-
-	string FormatChecks(IReadOnlyList<KeyValuePair<string, string>> ts)
-    {
-        /*
-            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
-            if (a == null) throw new ArgumentNullException(nameof(a));
-            if (b == null) throw new ArgumentNullException(nameof(b));
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
-        */
-
-        var paramChecks = string.Join(" ", ts.Select((a, i) => string.Format("if (p{0} == null) throw new ArgumentNullException(nameof(p{0}));", i)));
-
-        return $"if (ctx == null) throw new ArgumentNullException(nameof(ctx));{paramChecks}" + "if (expression == null) throw new ArgumentNullException(nameof(expression));";
+        return $"public static BoolExpr MkConstraint(this Context ctx, {inputs}, Expression<Func<{exprs}, bool>> expression) {{";
     }
 
 	string FormatBody(IReadOnlyList<KeyValuePair<string, string>> ts)
@@ -56,11 +42,10 @@
     }
 
 	/*
-[NotNull]
 public static BoolExpr MkConstraint(
-    [NotNull] this Context ctx,
-    [NotNull] Inty a, [NotNull] Inty b, [NotNull] Inty c,
-    [NotNull] Expression<Func<long, long, long, bool>> expression
+    this Context ctx,
+    Inty a, Inty b, Inty c,
+    Expression<Func<long, long, long, bool>> expression
 )
 {
     if (ctx == null) throw new ArgumentNullException(nameof(ctx));
@@ -72,10 +57,10 @@ public static BoolExpr MkConstraint(
 }
 */
 
+
 #>
 using System;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 using Microsoft.Z3;
 using ZedZedZed.Containers;
 
@@ -91,12 +76,10 @@ namespace ZedZedZed.Extensions {
 
 		foreach (var item in re) {
 			var sig = FormatSignature(item);
-			var chx = FormatChecks(item);
 			var bdy = FormatBody(item);
 
 			#>
 				<#= sig #>
-				<#= chx #>
 				<#= bdy #>
 			}
 			<#

@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 using Microsoft.Z3;
 using ZedZedZed.Containers;
 
 namespace ZedZedZed.Extensions
 {
-    internal static class MkExpressionConstraint
+    public static class MkExpressionConstraint
     {
-        [NotNull]
-        internal static IReadOnlyDictionary<string, Expr> ExtractParameters(Context ctx, [NotNull, ItemNotNull] ICollection<ParameterExpression> parameters, [NotNull, ItemNotNull] params IZ3Container[] containers)
+        internal static IReadOnlyDictionary<string, Expr> ExtractParameters(Context ctx, ICollection<ParameterExpression> parameters, params IZ3Container[] containers)
         {
             var values = containers.Select(c => c.ToExpr(ctx)).ToArray();
             if (values.Length != parameters.Count)
@@ -38,8 +36,7 @@ namespace ZedZedZed.Extensions
             return nameToExpr;
         }
 
-        [NotNull]
-        internal static BoolExpr CreateBoolExpression([NotNull] Context ctx, IReadOnlyDictionary<string, Expr> values, [NotNull] Expression expression)
+        public static BoolExpr CreateBoolExpression(Context ctx, IReadOnlyDictionary<string, Expr> values, Expression expression)
         {
             switch (expression.NodeType)
             {
@@ -116,7 +113,7 @@ namespace ZedZedZed.Extensions
             return type == typeof(bool);
         }
 
-        private static BoolExpr CreateInequality([NotNull] Context ctx, [NotNull] IReadOnlyDictionary<string, Expr> values, [NotNull] BinaryExpression expression)
+        private static BoolExpr CreateInequality(Context ctx, IReadOnlyDictionary<string, Expr> values, BinaryExpression expression)
         {
             //If the two sides are both booleans then we can only do direct equality tests
             if (IsBoolType(expression.Left.Type) && IsBoolType(expression.Right.Type))

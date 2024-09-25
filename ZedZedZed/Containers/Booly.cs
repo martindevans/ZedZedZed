@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Microsoft.Z3;
 
 namespace ZedZedZed.Containers
@@ -8,7 +7,7 @@ namespace ZedZedZed.Containers
         : IZ3Container
     {
         private readonly bool _value;
-        private readonly BoolExpr _expr;
+        private readonly BoolExpr? _expr;
 
         private Booly(BoolExpr expr)
         {
@@ -20,13 +19,11 @@ namespace ZedZedZed.Containers
             _value = value;
         }
 
-        [NotNull]
         public static implicit operator Booly(BoolExpr expr)
         {
             return new Booly(expr);
         }
 
-        [NotNull]
         public static implicit operator Booly(bool value)
         {
             return new Booly(value);
@@ -37,13 +34,9 @@ namespace ZedZedZed.Containers
             throw new NotSupportedException();
         }
 
-        [NotNull]
         public Expr ToExpr(Context ctx)
         {
-            if (_expr != null)
-                return _expr;
-            else
-                return ctx.MkBool(_value);
+            return _expr ?? ctx.MkBool(_value);
         }
     }
 }

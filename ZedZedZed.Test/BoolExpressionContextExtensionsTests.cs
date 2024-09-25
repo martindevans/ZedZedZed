@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Z3;
+﻿using Microsoft.Z3;
 using ZedZedZed.Extensions;
 
 namespace ZedZedZed.Test

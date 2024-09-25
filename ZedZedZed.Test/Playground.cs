@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Z3;
+﻿using Microsoft.Z3;
 using ZedZedZed.Containers;
 using ZedZedZed.Extensions;
 
@@ -11,6 +7,79 @@ namespace ZedZedZed.Test
     [TestClass]
     public class Playground
     {
+        [TestMethod]
+        public void Superoptimization()
+        {
+            // types:
+            // 0 - int
+            // 1 - str
+
+            /*
+             * a = :a
+             * b = :b
+             * conditional(a < b) // let's assume comparing strings is an error
+             * true {
+             *  :c = a
+             * }
+             * false {
+             *  :c = b
+             * }
+             * error {
+             *  :c = 0
+             * }
+             */
+
+            using (var ctx = new Context())
+            {
+                var s = ctx.MkSolver();
+                
+                var typeSort = ctx.MkEnumSort(ctx.MkSymbol("type"), ctx.MkSymbol("int"), ctx.MkSymbol("str"));
+                var itype = typeSort.Const(0);
+                var stype = typeSort.Const(1);
+
+                var a0_typ = ctx.MkConst("a0_typ", typeSort);
+                var a0_int = (IntExpr)ctx.MkConst("a0_int", ctx.IntSort);
+                var a0_str = ctx.MkConst("a0_str", ctx.StringSort);
+
+                var b0_typ = ctx.MkConst("b0_typ", typeSort);
+                var b0_int = (IntExpr)ctx.MkConst("b0_int", ctx.IntSort);
+                var b0_str = ctx.MkConst("b0_str", ctx.StringSort);
+
+                // A is a number value
+                s.Assert(ctx.MkEq(a0_typ, typeSort.Const(0)));
+
+                // B is a number value
+                s.Assert(ctx.MkEq(b0_typ, typeSort.Const(0)));
+
+                // branch can go three ways:
+                // 0: a < b
+                // 1: b > a
+                // 2: either is a string
+                var branch0 = ctx.MkConst("branch0", ctx.IntSort);
+
+                s.Assert(
+                      (ctx.MkEq(a0_typ, itype) & ctx.MkEq(b0_typ, itype) & ctx.MkLt(a0_int, b0_int) & ctx.MkEq(branch0, ctx.MkInt(0)))
+                    | (ctx.MkEq(a0_typ, itype) & ctx.MkEq(b0_typ, itype) & ctx.MkNot(ctx.MkLt(a0_int, b0_int)) & ctx.MkEq(branch0, ctx.MkInt(1)))
+                    | ctx.MkEq(branch0, ctx.MkInt(1))
+                );
+
+                s.Push();
+                s.Assert(ctx.MkEq(branch0, ctx.MkInt(2)));
+                Console.WriteLine(s.Check());
+                s.Pop();
+                Console.WriteLine(s.Check());
+
+                Console.WriteLine(s.Check());
+                var v = s.Model.Eval(branch0);
+                Console.WriteLine(v);
+
+                ////https://stackoverflow.com/questions/13395391/z3-finding-all-satisfying-models
+                //var e = s.Model.ConstInterp(b0_type.FuncDecl);
+                //Console.WriteLine(e);
+                ////s.Model.ConstInterp(
+            }
+        }
+
         [TestMethod]
         public void Playground1()
         {
